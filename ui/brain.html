@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Company Brain - Detailed View</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="brain.js" defer></script>
+</head>
+<body>
+    <div class="brain-container">
+        <header>
+            <h1>AI Software Factory - Demo Company Brain</h1>
+            <nav>
+                <a href="#" onclick="navigateToHome()">Home</a>
+                <a href="#brain" onclick="navigateToBrain()">Company Brain</a>
+                <a href="#health" onclick="checkHealth()">Health Check</a>
+            </nav>
+        </header>
+        
+        <main>
+            <section class="brain-section">
+                <h2>Company Information</h2>
+                <div id="company-info-content">
+                    <div class="loading">Loading company information...</div>
+                </div>
+            </section>
+            
+            <section class="brain-section">
+                <h2>Key Facts</h2>
+                <div id="facts-content">
+                    <div class="loading">Loading facts data...</div>
+                </div>
+            </section>
+            
+            <section class="brain-section">
+                <h2>Timeline</h2>
+                <div id="timeline-content">
+                    <div class="loading">Loading timeline data...</div>
+                </div>
+            </section>
+            
+            <section class="brain-section">
+                <h2>Active Projects</h2>
+                <div id="projects-content">
+                    <div class="loading">Loading projects data...</div>
+                </div>
+            </section>
+            
+            <section class="brain-section">
+                <h2>Customers</h2>
+                <div id="customers-content">
+                    <div class="loading">Loading customers data...</div>
+                </div>
+            </section>
+            
+            <section class="brain-section">
+                <h2>UNS Simulator Status</h2>
+                <div id="uns-simulator-status">
+                    <div class="loading">Loading UNS simulator status...</div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2026 AI Software Factory - Demo Company Brain</p>
+            <p>Last updated: <span id="last-updated">Never</span></p>
+        </footer>
+    </div>
+</body>
+</html>

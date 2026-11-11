@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Company Brain - Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="brain.js" defer></script>
+</head>
+<body>
+    <div class="home-container">
+        <header>
+            <h1>AI Software Factory - Demo Company Brain</h1>
+            <p>A demonstration of the company brain functionality with UNS simulator integration</p>
+        </header>
+        
+        <main>
+            <section class="home-section">
+                <h2>Welcome to the Demo Company Brain</h2>
+                <p>This is a demonstration of the AI Software Factory's company brain system, showcasing the following features:</p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>📊 Company Intelligence</h3>
+                        <p>Comprehensive company information including overview, facts, and timeline data.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>🚀 Projects Dashboard</h3>
+                        <p>Track active projects with status, progress, and timeline information.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>👥 Customer Information</h3>
+                        <p>Manage and track customer relationships, types, and revenue data.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h3>🧠 UNS Simulator</h3>
+                        <p>Deterministic UNS simulation with consistent results across runs.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="home-section">
+                <h2>Quick Access</h2>
+                <div class="quick-access-grid">
+                    <button class="action-btn" onclick="navigateToBrain()">View Company Brain</button>
+                    <button class="action-btn" onclick="refreshBrainData()">Refresh Brain Data</button>
+                    <button class="action-btn" onclick="checkUNSSimulator()">Check UNS Simulator</button>
+                    <button class="action-btn" onclick="checkAPIStatus()">Check API Status</button>
+                </div>
+            </section>
+            
+            <section class="home-section" id="live-data">
+                <h2>Live Brain Data</h2>
+                <div id="live-data-container">
+                    <div class="loading">Loading live data...</div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2026 AI Software Factory - Demo Company Brain</p>
+            <p>Version 1.0.0 | All data is demo and for testing purposes only</p>
+        </footer>
+    </div>
+</body>
+</html>
