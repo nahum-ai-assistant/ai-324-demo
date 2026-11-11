@@ -5,9 +5,12 @@ This Flask application serves the demo brain data and provides read-only access 
 """
 
 from flask import Flask, jsonify, request
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 import os
+import json
+import time
+from functools import wraps
 
 # Add the demo directory to the path so we can import the UNS simulator
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,12 +21,42 @@ try:
 except ImportError:
     UNS_SIMULATOR_AVAILABLE = False
 
-app = Flask(__name__)
+# Import API blueprint from routes
+from routes import api_bp
 
-@app.route('/api/demo-brain')
-def get_demo_brain():
-    """Return demo brain data from company-brain directory."""
-    brain_data = {
+# File reading functions
+import os
+
+def read_brain_data_from_files():
+    """Read brain data from JSON file in company-brain directory."""
+    try:
+        file_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'company-brain',
+            'brain_data.json'
+        )
+        
+        with open(file_path, 'r') as f:
+            file_data = json.load(f)
+            
+        # Ensure the data has the expected structure
+        if 'data' not in file_data:
+            raise ValueError('Missing "data" field in brain data file')
+            
+        return file_data
+    except FileNotFoundError:
+        print(f"Warning: Brain data file not found at {file_path}, using fallback data")
+        return get_fallback_brain_data()
+    except json.JSONDecodeError as e:
+        print(f"Warning: Error parsing brain data file: {e}, using fallback data")
+        return get_fallback_brain_data()
+    except Exception as e:
+        print(f"Warning: Error reading brain data from file: {e}, using fallback data")
+        return get_fallback_brain_data()
+
+def get_fallback_brain_data():
+    """Return fallback brain data when file reading fails."""
+    return {
         "status": "success",
         "timestamp": datetime.now().isoformat(),
         "data": {
@@ -55,10 +88,116 @@ def get_demo_brain():
             ]
         }
     }
-    
+
+# Import the file reading function
+brain_data = read_brain_data_from_files()
+
+# API caching
+_cache = {}
+_cache_ttl = 30  # 30 seconds TTL for cached responses
+
+# Rate limiting
+_request_counts = {}
+_rate_limit_window = 60  # 1 minute window
+_rate_limit_max = 100    # Max requests per window
+
+def simple_auth_required(f):
+    """Simple authentication decorator for API endpoints."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check for API key in request headers
+        api_key = request.headers.get('X-API-Key') or request.args.get('api_key')
+        
+        # For demo purposes, accept any non-empty API key
+        if not api_key:
+            return jsonify({
+                "error": "API key required",
+                "status": "error"
+            }), 401
+            
+        # Add authentication header to response for security
+        response = f(*args, **kwargs)
+        if hasattr(response, 'headers'):
+            response.headers['X-Auth-Status'] = 'authenticated'
+            
+        return response
+    return decorated_function
+
+def cache_response(key, ttl=_cache_ttl):
+    """Decorator to cache API responses."""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Check cache first
+            if key in _cache:
+                cached_response, timestamp = _cache[key]
+                if time.time() - timestamp < ttl:
+                    return cached_response
+            
+            # Call original function
+            response = f(*args, **kwargs)
+            
+            # Cache successful responses
+            if response.status_code == 200:
+                # Try to get JSON data from response
+                try:
+                    data = response.get_json()
+                    if data and 'status' in data and data['status'] == 'success':
+                        # Cache a tuple of (response, timestamp)
+                        _cache[key] = (response, time.time())
+                except:
+                    pass
+            
+            return response
+        return decorated_function
+    return decorator
+
+def rate_limit(f):
+    """Simple rate limiting decorator."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        client_ip = request.remote_addr
+        current_time = int(time.time())
+        
+        # Clean old requests from the window
+        window_start = current_time - _rate_limit_window
+        if client_ip in _request_counts:
+            _request_counts[client_ip] = [
+                req_time for req_time in _request_counts[client_ip]
+                if req_time > window_start
+            ]
+        else:
+            _request_counts[client_ip] = []
+        
+        # Check rate limit
+        if len(_request_counts[client_ip]) >= _rate_limit_max:
+            return jsonify({
+                "error": "Rate limit exceeded. Please try again later.",
+                "status": "error",
+                "retry_after": _rate_limit_window
+            }), 429
+        
+        # Record this request
+        _request_counts[client_ip].append(current_time)
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Register the API blueprint
+app.register_blueprint(api_bp)
+
+@api_bp.route('/demo-brain')
+@simple_auth_required
+@cache_response('demo_brain')
+@rate_limit
+def get_demo_brain():
+    """Return demo brain data from company-brain directory."""
     return jsonify(brain_data)
 
-@app.route('/api/uns-simulator')
+@api_bp.route('/uns-simulator')
+@simple_auth_required
+@cache_response('uns_simulator')
+@rate_limit
 def get_uns_simulator():
     """Return UNS simulator data (read-only)."""
     if not UNS_SIMULATOR_AVAILABLE:
@@ -80,7 +219,10 @@ def get_uns_simulator():
             "status": "error"
         }), 500
 
-@app.route('/api/uns-query')
+@api_bp.route('/uns-query')
+@simple_auth_required
+@cache_response('uns_query')
+@rate_limit
 def get_uns_query():
     """Return UNS query tool data (read-only)."""
     if not UNS_SIMULATOR_AVAILABLE:
@@ -102,7 +244,9 @@ def get_uns_query():
             "status": "error"
         }), 500
 
-@app.route('/health')
+@api_bp.route('/health')
+@simple_auth_required
+@rate_limit
 def health_check():
     """Health check endpoint."""
     return jsonify({
@@ -112,4 +256,4 @@ def health_check():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)

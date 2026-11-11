@@ -1,0 +1,32 @@
+{
+    "status": "success",
+    "timestamp": "2026-11-11T18:51:00Z",
+    "data": {
+        "company": {
+            "name": "AI Software Factory (AISF)",
+            "type": "company",
+            "description": "AI Software Factory is a technology company focused on developing AI-powered solutions and enterprise software products.",
+            "founded": "2026",
+            "headquarters": "Zurich, Switzerland",
+            "industry": "AI Software Development"
+        },
+        "facts": {
+            "total_customers": 25,
+            "active_projects": 4,
+            "revenue_projection": 1250000.00,
+            "customer_satisfaction": 4.2
+        },
+        "projects": [
+            {"name": "Nahum AI OS", "status": "active", "progress": 87.5},
+            {"name": "City Intelligence", "status": "active", "progress": 92.3},
+            {"name": "Land Intelligence", "status": "active", "progress": 78.9},
+            {"name": "Bitdriver", "status": "active", "progress": 65.2}
+        ],
+        "customers": [
+            {"name": "Alcendo AG", "type": "Technology Partner", "status": "active"},
+            {"name": "Bitdriver AG", "type": "Product Client", "status": "active"},
+            {"name": "City Intelligence AG", "type": "Product Client", "status": "active"},
+            {"name": "Land Intelligence AG", "type": "Product Client", "status": "active"}
+        ]
+    }
+}
